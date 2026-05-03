@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meus Apps — Lucia Kratz</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f4f0fa;min-height:100vh;padding:20px}
+  .header{text-align:center;margin-bottom:24px}
+  h1{color:#6d039a;font-size:22px;margin-bottom:4px}
+  .sub{color:#888;font-size:13px}
+  .categoria{margin-bottom:28px}
+  .cat-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9b59b6;margin-bottom:10px;padding-left:4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(109,3,154,.08);border:1px solid #ede0f7;transition:transform .15s,box-shadow .15s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(109,3,154,.14)}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+  .card-name{font-weight:700;color:#3d0060;font-size:15px;line-height:1.3}
+  .card-repo{font-size:11px;color:#aaa;font-family:monospace;margin-top:2px}
+  .badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+  .badge-online{background:#e6f9ef;color:#1a7a4a}
+  .badge-pendente{background:#fff3e0;color:#e65c00}
+  .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{font-size:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:opacity .15s}
+  .btn:hover{opacity:.85}
+  .btn-abrir{background:#6d039a;color:#fff}
+  .btn-del{background:#fdecea;color:#c0392b}
+  .senha-row{display:flex;align-items:center;gap:6px;margin-top:8px;background:#f8f4fc;border-radius:8px;padding:6px 10px}
+  .senha-label{font-size:11px;color:#999;flex-shrink:0}
+  .senha-val{font-family:monospace;font-size:13px;color:#3d0060;letter-spacing:2px;flex:1}
+  .btn-eye{background:none;border:none;cursor:pointer;color:#9b59b6;font-size:14px;padding:0}
+  .notas{font-size:11px;color:#999;margin-top:6px;line-height:1.5}
+  .sep{height:1px;background:#ede0f7;margin:8px 0}
+  .icon-box{width:48px;height:48px;border-radius:10px;background:#f3eafc;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  /* Modal */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;padding:24px;width:90%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+  .modal h2{color:#6d039a;margin-bottom:16px;font-size:17px}
+  .modal label{font-size:12px;color:#666;margin-bottom:4px;display:block}
+  .modal input,.modal select,.modal textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:12px;font-family:inherit}
+  .modal textarea{height:60px;resize:vertical}
+  .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+  .btn-cancel{background:#eee;color:#666}
+  .btn-save{background:#6d039a;color:#fff}
+  .add-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:2px dashed #c9a0e0;border-radius:14px;padding:18px;color:#9b59b6;font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:all .15s;margin-top:16px}
+  .add-btn:hover{background:#f9f3fe;border-color:#6d039a;color:#6d039a}
+  .loading{text-align:center;color:#9b59b6;padding:40px;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🦋 Meus Apps</h1>
+  <p class="sub">luciakratz-arch · GitHub Pages</p>
+</div>
+
+<div id="container"><div class="loading">⏳ Carregando apps...</div></div>
+<button class="add-btn" onclick="abrirModal()">＋ Adicionar novo app</button>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>➕ Novo App</h2>
+    <label>Nome do app</label>
+    <input id="m-nome" placeholder="Ex: Avaliação Neuropsicológica">
+    <label>Repositório (GitHub)</label>
+    <input id="m-repo" placeholder="Ex: avaliacao-neuro">
+    <label>Categoria</label>
+    <select id="m-cat">
+      <option value="clinica">🧠 Clínica</option>
+      <option value="familia">👨‍👩‍👧 Família</option>
+      <option value="coral">🎵 Coral</option>
+      <option value="aequipe">🎶 A!Equipe</option>
+      <option value="outros">📦 Outros</option>
+    </select>
+    <label>Senha de admin (se tiver)</label>
+    <input id="m-senha" placeholder="Ex: 1234">
+    <label>Notas (opcional)</label>
+    <textarea id="m-notas" placeholder="Descrição, observações..."></textarea>
+    <label>Status</label>
+    <select id="m-status">
+      <option value="online">✅ Online</option>
+      <option value="pendente">⏳ Pendente</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarApp()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBjX5BoRRQTQRWqJw-MEsP_hZYZcHXTYt0",
+  authDomain: "agenda-kratz.firebaseapp.com",
+  databaseURL: "https://agenda-kratz-default-rtdb.firebaseio.com",
+  projectId: "agenda-kratz",
+  storageBucket: "agenda-kratz.firebasestorage.app",
+  messagingSenderId: "586296338835",
+  appId: "1:586296338835:web:da904d85acd9b16baea066",
+  measurementId: "G-DHZ54WMB9G"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+const COLL = "painel_apps";
+const BASE = "https://luciakratz-arch.github.io/";
+
+const cats = {
+  clinica: "🧠 Clínica",
+  familia: "👨‍👩‍👧 Família",
+  coral:   "🎵 Coral",
+  aequipe: "🎶 A!Equipe",
+  outros:  "📦 Outros",
+};
+
+const defaultApps = [
+  { id:"gestao-ansiedade",      nome:"Gestão da Ansiedade",      repo:"gestao-ansiedade",      cat:"clinica", senha:"1234", notas:"Portal psicóloga + paciente. Login paciente só por nome.", status:"online" },
+  { id:"entrevista-inicial",    nome:"Entrevista Inicial",        repo:"entrevista-inicial",    cat:"clinica", senha:"1234", notas:"Ficha de entrevista clínica inicial com histórico.",       status:"online" },
+  { id:"treino-auditivo",       nome:"Treino Auditivo",           repo:"treino-auditivo",       cat:"clinica", senha:"1234", notas:"Terapia musical com estímulos auditivos.",                 status:"online" },
+  { id:"kratz-familia",         nome:"Sistema Família Kratz",     repo:"kratz-familia",         cat:"familia", senha:"1234", notas:"Calendário, domingos, saúde e membros.",                  status:"online" },
+  { id:"onix-brasil",           nome:"Ônix Brasil Vocal",         repo:"onix-brasil",           cat:"coral",   senha:"1234", notas:"Gestão do coral Ônix Brasil.",                            status:"online" },
+  { id:"coral-flamboyant",      nome:"Coral Flamboyant",          repo:"coral-flamboyant",      cat:"coral",   senha:"1234", notas:"Gestão do Coral Flamboyant.",                             status:"online" },
+  { id:"RIFA-ONIX",             nome:"RIFA-ONIX",                 repo:"RIFA-ONIX",             cat:"coral",   senha:"",     notas:"Sistema de rifa do Ônix Brasil.",                         status:"online" },
+  { id:"travessia-adufg",       nome:"Travessia ADUFG Eventos",   repo:"travessia-adufg-eventos",cat:"aequipe",senha:"",     notas:"Sistema de inscrições para eventos do Grupo Travessia.",  status:"online" },
+];
+
+let apps = [];
+let senhasVisiveis = {};
+
+async function init() {
+  const snap = await getDocs(collection(db, COLL));
+  if (snap.empty) {
+    // Primeira vez: sobe os apps padrão no Firebase
+    for (const a of defaultApps) {
+      await setDoc(doc(db, COLL, a.id), a);
+    }
+    apps = [...defaultApps];
+  } else {
+    apps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  render();
+}
+
+function render() {
+  const container = document.getElementById("container");
+  const ordem = ["clinica","familia","coral","aequipe","outros"];
+  let html = "";
+  for (const catKey of ordem) {
+    const lista = apps.filter(a => a.cat === catKey);
+    if (!lista.length) continue;
+    html += `<div class="categoria"><div class="cat-title">${cats[catKey]}</div><div class="grid">`;
+    for (const a of lista) {
+      const url = BASE + a.repo;
+      const vis = senhasVisiveis[a.id];
+      const senhaDisplay = vis ? (a.senha || "—") : (a.senha ? "••••" : "—");
+      const badge = a.status === "online"
+        ? '<span class="badge badge-online">✅ Online</span>'
+        : '<span class="badge badge-pendente">⏳ Pendente</span>';
+      html += `
+        <div class="card">
+          <div class="card-top">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="icon-box">📱</div>
+              <div>
+                <div class="card-name">${a.nome}</div>
+                <div class="card-repo">${a.repo}</div>
+              </div>
+            </div>
+            ${badge}
+          </div>
+          ${a.notas ? `<div class="notas">${a.notas}</div>` : ""}
+          ${a.senha ? `
+          <div class="sep"></div>
+          <div class="senha-row">
+            <span class="senha-label">🔑 Admin:</span>
+            <span class="senha-val">${senhaDisplay}</span>
+            <button class="btn-eye" onclick="toggleSenha('${a.id}')">${vis ? "🙈" : "👁️"}</button>
+          </div>` : ""}
+          <div class="actions">
+            <a class="btn btn-abrir" href="${url}" target="_blank">🔗 Abrir</a>
+            <button class="btn" style="background:#e8f0fe;color:#1a56db" onclick="editarApp('${a.id}')">✏️</button>
+            <button class="btn btn-del" onclick="removerApp('${a.id}')">🗑️</button>
+          </div>
+        </div>`;
+    }
+    html += "</div></div>";
+  }
+  container.innerHTML = html;
+}
+
+window.editarApp = (id) => {
+  const a = apps.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById("m-nome").value = a.nome;
+  document.getElementById("m-repo").value = a.repo;
+  document.getElementById("m-cat").value = a.cat;
+  document.getElementById("m-senha").value = a.senha || "";
+  document.getElementById("m-notas").value = a.notas || "";
+  document.getElementById("m-status").value = a.status;
+  document.querySelector(".modal h2").textContent = "✏️ Editar App";
+  document.querySelector(".btn-save").onclick = () => atualizarApp(id);
+  abrirModal();
+};
+
+window.atualizarApp = async (id) => {
+  const nome = document.getElementById("m-nome").value.trim();
+  const repo = document.getElementById("m-repo").value.trim();
+  if (!nome || !repo) { alert("Nome e repositório são obrigatórios."); return; }
+  const dados = {
+    nome, repo,
+    cat:    document.getElementById("m-cat").value,
+    senha:  document.getElementById("m-senha").value.trim(),
+    notas:  document.getElementById("m-notas").value.trim(),
+    status: document.getElementById("m-status").value,
+  };
+  await setDoc(doc(db, COLL, id), dados);
+  apps = apps.map(a => a.id === id ? { id, ...dados } : a);
+  fecharModal();
+  document.querySelector(".modal h2").textContent = "➕ Novo App";
+  document.querySelector(".btn-save").onclick = salvarApp;
+  render();
+};
+
+
+
+window.removerApp = async (id) => {
+  if (!confirm("Remover este app do painel?")) return;
+  await deleteDoc(doc(db, COLL, id));
+  apps = apps.filter(a => a.id !== id);
+  render();
+};
+
+window.abrirModal = () => document.getElementById("overlay").classList.add("show");
+window.fecharModal = () => document.getElementById("overlay").classList.remove("show");
+
+window.salvarApp = async () => {
+  const nome = document.getElementById("m-nome").value.trim();
+  const repo = document.getElementById("m-repo").value.trim();
+  if (!nome || !repo) { alert("Nome e repositório são obrigatórios."); return; }
+  const novo = {
+    nome,
+    repo,
+    cat:    document.getElementById("m-cat").value,
+    senha:  document.getElementById("m-senha").value.trim(),
+    notas:  document.getElementById("m-notas").value.trim(),
+    status: document.getElementById("m-status").value,
+  };
+  const ref = await addDoc(collection(db, COLL), novo);
+  apps.push({ id: ref.id, ...novo });
+  fecharModal();
+  ["m-nome","m-repo","m-senha","m-notas"].forEach(id => document.getElementById(id).value = "");
+  render();
+};
+
+document.getElementById("overlay").addEventListener("click", e => {
+  if (e.target === document.getElementById("overlay")) fecharModal();
+});
+
+init();
+</script>
+</body>
+</html>
